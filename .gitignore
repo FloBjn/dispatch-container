@@ -1,0 +1,31 @@
+/target
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Gradle build output directory
+build
+
+# Backupfiles from mergetools #
+*.orig
+
+# Java Class Files #
+*.class
+
+# Compressed Files #
+*.zip
+
+# Eclipse #
+.project
+.settings
+.classpath
+bin
+
+# IntelliJ IDEA #
+.idea
+*.iml
+out
+
+# logs file
+
+logs/*.log
+**/logs/*.log
