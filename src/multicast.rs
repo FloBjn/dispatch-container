@@ -3,7 +3,7 @@ use tokio::net::UdpSocket;
 
 /// Adresse et port multicast
 const MULTICAST_IP: &str = "224.123.123.123";
-const MULTICAST_PORT: u16 = 1234;
+const MULTICAST_PORT: u16 = 50204; // Port multicast de notre groupe
 
 /// Fonction pour envoyer les annonces ALIVE en multicast
 pub async fn send_alive(domain_name: &str, tcp_port: u16) {
