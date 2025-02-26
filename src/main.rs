@@ -1,6 +1,7 @@
 mod multicast;
 mod protocol;
 mod unicast;
+mod message_analyser;
 
 const DOMAIN_NAME: &str = "container01";
 const TCP_PORT: u16 = 1234;
