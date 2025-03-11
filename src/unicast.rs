@@ -5,7 +5,7 @@ use tokio::time::sleep;
 use crate::{message_analyser, protocol};
 
 /// Fonction pour se connecter au Dispatcher en TCP et gérer les déconnexions proprement.
-pub async fn connect_to_dispatcher(dispatcher_ip: &str, tcp_port: u16) {
+pub async fn connect_to_dispatcher(dispatcher_ip: &str, tcp_port: u16, file_name: &str) {
     let dispatcher_addr = format!("{}:{}", dispatcher_ip, tcp_port);
 
     loop {
@@ -42,7 +42,7 @@ pub async fn connect_to_dispatcher(dispatcher_ip: &str, tcp_port: u16) {
                             println!("📩 Réponse reçue : {}", line.trim());
 
                             // Analyse du message reçu
-                            message_analyser::analyse_message(&line);
+                            message_analyser::analyse_message(file_name, &line);
 
                             line.clear();
                         }

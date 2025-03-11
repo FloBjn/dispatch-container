@@ -3,8 +3,7 @@ use lazy_static::lazy_static;
 
 /// Définition statique des regex (doit être en dehors d'un `impl`)
 lazy_static! {
-    pub static ref POST_REGEX: Regex = Regex::new(r"^POST\s+(?P<filename>[A-Za-z0-9._-]+)\s+(?P<size>\d+)\s+(?P<hash>[A-Za-z0-9]+)\r\n$").unwrap();
-    pub static ref GET_REGEX: Regex = Regex::new(r"^GET\s+(?P<filename>[A-Za-z0-9._-]+)\r\n$").unwrap();
+pub static ref POST_REGEX: Regex = Regex::new(r"^POST\s+(?P<filename>[A-Za-z0-9._-]+)\s+(?P<size>\d+)\s+(?P<hash>[A-Za-z0-9]+)\r\n(?P<octets>.*)$").unwrap();    pub static ref GET_REGEX: Regex = Regex::new(r"^GET\s+(?P<filename>[A-Za-z0-9._-]+)\r\n$").unwrap();
     pub static ref DELETE_REGEX: Regex = Regex::new(r"^DELETE\s+(?P<filename>[A-Za-z0-9._-]+)\r\n$").unwrap();
 }
 
@@ -15,12 +14,13 @@ impl Protocol {
     pub const EOL: &'static str = "\r\n";
 
     /// Vérifie si un message correspond au format POST
-    pub fn parse_post(message: &str) -> Option<(String, usize, String)> {
+    pub fn parse_post(message: &str) -> Option<(String, usize, String, String)> {
         if let Some(captures) = POST_REGEX.captures(message) {
             let filename = captures["filename"].to_string();
             let size = captures["size"].parse::<usize>().ok()?;
             let hash = captures["hash"].to_string();
-            Some((filename, size, hash))
+            let octets = captures["octets"].to_string();
+            Some((filename, size, hash, octets))
         } else {
             None
         }
