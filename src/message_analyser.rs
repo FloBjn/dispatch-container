@@ -1,19 +1,19 @@
-use std::fs::File;
 use crate::{post_manager, protocol};
 
-/// Analyser du message reçu
-/// Si le message est un POST, sauvegarder le fichier
-/// Si le message est un GET, envoyer le fichier
-/// Si le message est un DELETE, supprimer le fichier
-pub(crate) fn analyse_message(file_name: &str, line: &String) {
-    // Analyser le message reçu
-    if let Some((filename, size, hash, octets)) = protocol::Protocol::parse_post(&line) {
-        post_manager::save_file(file_name.parse().unwrap(), size, hash, octets);
-    } else if let Some(filename) = protocol::Protocol::parse_get(&line) {
-        println!("GET - Fichier: {}", filename);
-    } else if let Some(filename) = protocol::Protocol::parse_delete(&line) {
-        println!("DELETE - Fichier: {}", filename);
-    } else {
-        println!("Message non reconnu");
+/// Analyse un message reçu et effectue l'action correspondante.
+pub(crate) fn analyse_message(directory: &str, line: &String) -> String {
+    match (
+        protocol::Protocol::parse_post(line),
+        protocol::Protocol::parse_get(line),
+        protocol::Protocol::parse_delete(line),
+    ) {
+        (Some((filename, size, hash, octets)), _, _) => {
+            // Sauvegarde le fichier et renvoie la réponse
+            let response = post_manager::save_file(directory, filename, size, hash, octets);
+            response.to_string()
+        }
+        (_, Some(filename), _) => format!("GET - Fichier: {}\n", filename),
+        (_, _, Some(filename)) => format!("DELETE - Fichier: {}\n", filename),
+        _ => "Message non reconnu\n".to_string(),
     }
 }

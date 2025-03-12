@@ -3,7 +3,8 @@ use lazy_static::lazy_static;
 
 /// Définition statique des regex (doit être en dehors d'un `impl`)
 lazy_static! {
-pub static ref POST_REGEX: Regex = Regex::new(r"^POST\s+(?P<filename>[A-Za-z0-9._-]+)\s+(?P<size>\d+)\s+(?P<hash>[A-Za-z0-9]+)\r\n(?P<octets>.*)$").unwrap();    pub static ref GET_REGEX: Regex = Regex::new(r"^GET\s+(?P<filename>[A-Za-z0-9._-]+)\r\n$").unwrap();
+    pub static ref POST_REGEX: Regex = Regex::new(r"^POST\s+(?P<filename>[A-Za-z0-9._-]+)\s+(?P<size>\d+)\s+(?P<hash>[A-Za-z0-9]+)\r\n(?P<octets>.*)$").unwrap();
+    pub static ref GET_REGEX: Regex = Regex::new(r"^GET\s+(?P<filename>[A-Za-z0-9._-]+)\r\n$").unwrap();
     pub static ref DELETE_REGEX: Regex = Regex::new(r"^DELETE\s+(?P<filename>[A-Za-z0-9._-]+)\r\n$").unwrap();
 }
 

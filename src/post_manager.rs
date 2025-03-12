@@ -1,15 +1,32 @@
-use std::io::Write;
+use std::fs::{create_dir_all, File};
+use std::io::{Write, Error};
+use std::path::Path;
 
-pub(crate) fn save_file(filename_hash: String, size_hash: usize, content_hash: String, octets: String) {
-    // Créer un fichier avec le nom du fichier
-    let mut file = std::fs::OpenOptions::new().create(true).write(true).open(&filename_hash).expect("Impossible de créer ou d'ouvrir le fichier");
+/// Sauvegarde un fichier dans `directory` avec le contenu reçu.
+/// Retourne "POST_OK\r\n" en cas de succès, sinon "POST_ERROR\r\n".
+pub(crate) fn save_file(directory: &str, filename: String, _size: usize, _hash: String, content: String) -> String {
+    let path = Path::new(directory);
 
-    // Écrire le contenu du fichier
-    file.write_all(octets.as_bytes()).expect("Impossible d'écrire dans le fichier");
+    // Création du dossier s'il n'existe pas
+    if !path.exists() {
+        if let Err(e) = create_dir_all(path) {
+            eprintln!("⚠️ Erreur de création du dossier {} : {}", directory, e);
+            return "POST_ERROR\r\n".to_string();
+        }
+    }
 
-    // Vérifier si le fichier a été correctement écrit
-    let file = std::fs::File::open(&filename_hash).expect("Impossible d'ouvrir le fichier");
-    let metadata = file.metadata().expect("Impossible de lire les métadonnées du fichier");
-    let file_size = metadata.len() as usize;
+    // Chemin complet du fichier
+    let file_path = path.join(filename);
 
+    // Écriture du fichier
+    match File::create(&file_path).and_then(|mut file| file.write_all(content.as_bytes())) {
+        Ok(_) => {
+            println!("✅ Fichier {} sauvegardé avec succès !", file_path.display());
+            "POST_OK\r\n".to_string()
+        }
+        Err(e) => {
+            eprintln!("⚠️ Erreur lors de la sauvegarde du fichier {} : {}", file_path.display(), e);
+            "POST_ERROR\r\n".to_string()
+        }
+    }
 }
