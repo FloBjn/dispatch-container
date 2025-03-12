@@ -4,6 +4,8 @@ mod unicast;
 mod message_analyser;
 mod post_manager;
 mod protocol_test;
+mod get_manager;
+mod delete_manager;
 
 const DOMAIN_NAME: &str = "container01";
 const MULTICAST_IP: &str = "224.123.123.123";
