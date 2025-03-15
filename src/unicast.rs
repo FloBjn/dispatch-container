@@ -6,12 +6,7 @@ use tokio::time::sleep;
 use crate::{message_analyser, protocol};
 
 /// Se connecte au Dispatcher en TCP et gère les déconnexions proprement.
-pub async fn connect_to_dispatcher() {
-    let config = ini!("C:\\bloc2\\UE21_Reseau\\projet\\container\\dispatch-container\\src\\config.ini");
-
-    let dispatcher_ip = config["container_config"]["dispatcher_ip"].clone().unwrap();
-    let unicast_port = config["container_config"]["unicast_port"].clone().unwrap();
-    let working_folder_path = config["container_config"]["working_folder_path"].clone().unwrap();
+pub async fn connect_to_dispatcher(dispatcher_ip: String, unicast_port: String, working_folder_path: String) {
 
     let dispatcher_addr = format!("{}:{}", dispatcher_ip, unicast_port);
 

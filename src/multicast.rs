@@ -3,13 +3,7 @@ use tokio::time::{sleep, Duration};
 use tokio::net::UdpSocket;
 
 /// Fonction pour envoyer les annonces ALIVE en multicast
-pub async fn send_alive() {
-    let config = ini!("C:\\bloc2\\UE21_Reseau\\projet\\container\\dispatch-container\\src\\config.ini");
-
-    let domain_name = config["container_config"]["container_id"].clone().unwrap();
-    let multicast_address = config["container_config"]["multicast_address"].clone().unwrap();
-    let multicast_port = config["container_config"]["multicast_port"].clone().unwrap();
-    let multicast_delay = config["container_config"]["multicast_delay_in_seconds"].clone().unwrap();
+pub async fn send_alive(domain_name: String, multicast_address: String, multicast_port: String, multicast_delay: String) {
     // Crée un socket UDP qui peut envoyer des messages Multicast
     let socket = UdpSocket::bind("0.0.0.0:0")
         .await
