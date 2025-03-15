@@ -1,12 +1,19 @@
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::net::TcpStream;
 use std::time::Duration;
+use ini::ini;
 use tokio::time::sleep;
 use crate::{message_analyser, protocol};
 
 /// Se connecte au Dispatcher en TCP et gère les déconnexions proprement.
-pub async fn connect_to_dispatcher(dispatcher_ip: &str, tcp_port: u16, directory: &str) {
-    let dispatcher_addr = format!("{}:{}", dispatcher_ip, tcp_port);
+pub async fn connect_to_dispatcher() {
+    let config = ini!("C:\\bloc2\\UE21_Reseau\\projet\\container\\dispatch-container\\src\\config.ini");
+
+    let dispatcher_ip = config["container_config"]["dispatcher_ip"].clone().unwrap();
+    let unicast_port = config["container_config"]["unicast_port"].clone().unwrap();
+    let working_folder_path = config["container_config"]["working_folder_path"].clone().unwrap();
+
+    let dispatcher_addr = format!("{}:{}", dispatcher_ip, unicast_port);
 
     loop {
         println!("📡 Tentative de connexion à {}", dispatcher_addr);
@@ -15,12 +22,12 @@ pub async fn connect_to_dispatcher(dispatcher_ip: &str, tcp_port: u16, directory
             Ok(mut stream) => {
                 println!("✅ Connecté au Dispatcher ({})", dispatcher_addr);
 
-                if let Err(e) = register_container(&mut stream, tcp_port).await {
+                if let Err(e) = register_container(&mut stream, unicast_port.parse().unwrap()).await {
                     eprintln!("⚠️ Erreur d'envoi : {}", e);
                     continue;
                 }
 
-                if let Err(e) = listen_for_messages(stream, directory).await {
+                if let Err(e) = listen_for_messages(stream, &*working_folder_path).await {
                     eprintln!("⚠️ Erreur de communication : {}", e);
                 }
             }
