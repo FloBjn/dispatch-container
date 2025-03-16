@@ -1,11 +1,14 @@
 mod multicast;
-mod protocol;
+pub mod protocol;
 mod unicast;
 mod message_analyser;
-mod post_manager;
 mod protocol_test;
-mod get_manager;
-mod delete_manager;
+
+mod request_manager {
+    pub mod delete_manager;
+    pub mod get_manager;
+    pub mod post_manager;
+}
 
 const DOMAIN_NAME: &str = "container01";
 const MULTICAST_IP: &str = "224.123.123.123";
@@ -21,7 +24,7 @@ async fn main() {
     println!("🚀 Container Rust démarré...");
 
     // Exécuter Multicast et Unicast en parallèle
-    let multicast_task = tokio::spawn(multicast::send_alive(DOMAIN_NAME, MULTICAST_IP, MULTICAST_PORT, MULTICAST_DELAY));
+    let multicast_task = tokio::spawn(multicast::send_alive(DOMAIN_NAME, MULTICAST_IP, MULTICAST_PORT, MULTICAST_DELAY, UNICAST_PORT));
     let unicast_task = tokio::spawn(unicast::connect_to_dispatcher("127.0.0.1", UNICAST_PORT, DIRECTORY));
 
     // Attendre que les deux tâches tournent en parallèle

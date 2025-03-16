@@ -2,7 +2,7 @@ use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::net::TcpStream;
 use std::time::Duration;
 use tokio::time::sleep;
-use crate::{message_analyser, protocol};
+use crate::{message_analyser};
 
 /// Se connecte au Dispatcher en TCP et gère les déconnexions proprement.
 pub async fn connect_to_dispatcher(dispatcher_ip: &str, tcp_port: u16, directory: &str) {
@@ -56,7 +56,7 @@ async fn listen_for_messages(mut stream: TcpStream, directory: &str) -> tokio::i
             }
             Ok(_) => {
                 println!("📩 Réponse reçue : {}", line.trim());
-                let response = message_analyser::analyse_message(directory, &line);
+                let response = format!("\n{}", message_analyser::analyse_message(directory, &line));
                 writer.write_all(response.as_bytes()).await?;
                 line.clear();
             }
