@@ -1,5 +1,7 @@
 use ini::ini;
 
+use std::path::PathBuf;
+
 mod multicast;
 mod protocol;
 mod unicast;
@@ -12,7 +14,16 @@ mod delete_manager;
 #[tokio::main]
 async fn main() {
     println!("🚀 Container Rust démarré...");
-    let config = ini!("C:\\bloc2\\UE21_Reseau\\projet\\container\\dispatch-container\\src\\config.ini");
+
+    // Construction dynamique du chemin
+    let config_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("src/config.ini")
+        .to_string_lossy()
+        .into_owned();
+
+    let config = ini!(&config_path);    
+
+    //let config = ini!("C:\\bloc2\\UE21_Reseau\\projet\\container\\dispatch-container\\src\\config.ini");
 
     let domain_name = config["container_config"]["container_id"].clone().unwrap();
     let multicast_address = config["container_config"]["multicast_address"].clone().unwrap();
