@@ -25,7 +25,7 @@ async fn main() {
 
     // Exécuter Multicast et Unicast en parallèle
     let multicast_task = tokio::spawn(multicast::send_alive(DOMAIN_NAME, MULTICAST_IP, MULTICAST_PORT, MULTICAST_DELAY, UNICAST_PORT));
-    let unicast_task = tokio::spawn(unicast::connect_to_dispatcher("127.0.0.1", UNICAST_PORT, DIRECTORY));
+    let unicast_task = tokio::spawn(unicast::start_container_server(UNICAST_PORT, DIRECTORY.to_string()));
 
     // Attendre que les deux tâches tournent en parallèle
     let _ = tokio::join!(multicast_task, unicast_task);

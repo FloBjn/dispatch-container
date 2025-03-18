@@ -1,49 +1,35 @@
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
-use tokio::net::TcpStream;
-use std::time::Duration;
-use tokio::time::sleep;
-use crate::{message_analyser};
+use tokio::net::{TcpListener, TcpStream};
+use std::sync::Arc;
+use crate::message_analyser;
 
-/// Se connecte au Dispatcher en TCP et gère les déconnexions proprement.
-pub async fn connect_to_dispatcher(dispatcher_ip: &str, tcp_port: u16, directory: &str) {
-    let dispatcher_addr = format!("{}:{}", dispatcher_ip, tcp_port);
+/// Lance un serveur TCP pour écouter les connexions du Dispatcher.
+pub async fn start_container_server(tcp_port: u16, directory: String) -> tokio::io::Result<()> {
+    let listener = TcpListener::bind(("0.0.0.0", tcp_port)).await?;
+    let directory = Arc::new(directory); // Partage du répertoire entre les connexions
+
+    println!("📡 Serveur démarré sur le port {}", tcp_port);
 
     loop {
-        println!("📡 Tentative de connexion à {}", dispatcher_addr);
-
-        match TcpStream::connect(&dispatcher_addr).await {
-            Ok(mut stream) => {
-                println!("✅ Connecté au Dispatcher ({})", dispatcher_addr);
-
-                if let Err(e) = register_container(&mut stream, tcp_port).await {
-                    eprintln!("⚠️ Erreur d'envoi : {}", e);
-                    continue;
-                }
-
-                if let Err(e) = listen_for_messages(stream, directory).await {
-                    eprintln!("⚠️ Erreur de communication : {}", e);
-                }
+        match listener.accept().await {
+            Ok((stream, addr)) => {
+                println!("✅ Connexion acceptée depuis {}", addr);
+                let directory = Arc::clone(&directory);
+                tokio::spawn(async move {
+                    if let Err(e) = handle_client(stream, &directory).await {
+                        eprintln!("⚠️ Erreur avec {} : {}", addr, e);
+                    }
+                });
             }
             Err(e) => {
-                eprintln!("⚠️ Erreur de connexion au Dispatcher : {}", e);
+                eprintln!("⚠️ Erreur d'acceptation de connexion : {}", e);
             }
         }
-
-        println!("⏳ Tentative de reconnexion dans 5s...");
-        sleep(Duration::from_secs(5)).await;
     }
 }
 
-/// Envoie un message d'enregistrement au Dispatcher.
-async fn register_container(stream: &mut TcpStream, tcp_port: u16) -> tokio::io::Result<()> {
-    let message = format!("REGISTER_CONTAINER {}\n", tcp_port);
-    stream.write_all(message.as_bytes()).await?;
-    println!("📨 Message envoyé : {}", message.trim());
-    Ok(())
-}
-
-/// Écoute les messages du Dispatcher et envoie les réponses.
-async fn listen_for_messages(mut stream: TcpStream, directory: &str) -> tokio::io::Result<()> {
+/// Gère une connexion avec un client (le Dispatcher).
+async fn handle_client(mut stream: TcpStream, directory: &str) -> tokio::io::Result<()> {
     let (reader, mut writer) = stream.split();
     let mut reader = BufReader::new(reader);
     let mut line = String::new();
@@ -51,17 +37,17 @@ async fn listen_for_messages(mut stream: TcpStream, directory: &str) -> tokio::i
     loop {
         match reader.read_line(&mut line).await {
             Ok(0) => {
-                println!("🔴 Déconnexion du Dispatcher !");
+                println!("🔴 Déconnexion du client !");
                 break;
             }
             Ok(_) => {
-                println!("📩 Réponse reçue : {}", line.trim());
+                println!("📩 Message reçu : {}", line.trim());
                 let response = format!("\n{}", message_analyser::analyse_message(directory, &line));
                 writer.write_all(response.as_bytes()).await?;
                 line.clear();
             }
             Err(e) => {
-                eprintln!("⚠️ Erreur de lecture depuis le Dispatcher : {}", e);
+                eprintln!("⚠️ Erreur de lecture du client : {}", e);
                 break;
             }
         }

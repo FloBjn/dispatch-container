@@ -2,7 +2,7 @@ use tokio::time::{sleep, Duration};
 use tokio::net::UdpSocket;
 
 /// Fonction pour envoyer les annonces ALIVE en multicast
-pub async fn send_alive(domain_name: &str, multicast_port: &str, port_multicast: u16, delay: u64, _unicast_port: u16) {
+pub async fn send_alive(domain_name: &str, multicast_ip: &str, port_multicast: u16, delay: u64, _unicast_port: u16) {
     // Crée un socket UDP qui peut envoyer des messages Multicast
     let socket = UdpSocket::bind("0.0.0.0:0")
         .await
@@ -12,7 +12,7 @@ pub async fn send_alive(domain_name: &str, multicast_port: &str, port_multicast:
         .set_multicast_loop_v4(true)
         .expect("Impossible d'activer le mode multicast");
 
-    let target = format!("{}:{}", multicast_port, port_multicast);
+    let target = format!("{}:{}", multicast_ip, port_multicast);
 
     loop {
         let message = format!("ALIVE {}. {}\r\n", domain_name, _unicast_port);
