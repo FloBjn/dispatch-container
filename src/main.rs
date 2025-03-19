@@ -14,7 +14,7 @@ const DOMAIN_NAME: &str = "container01";
 const MULTICAST_IP: &str = "224.123.123.123";
 const MULTICAST_PORT: u16 = 50204; // Port multicast de notre groupe
 const NETWORK_INTERFACE: &str = "eth0";
-const MULTICAST_DELAY: u64 = 60;
+const MULTICAST_DELAY: u64 = 10;
 static DIRECTORY: &str = "C:\\TEMP\\CONTAINER1";
 const UNICAST_PORT: u16 = 1234;
 
