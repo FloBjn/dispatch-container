@@ -1,7 +1,4 @@
-use ini::ini;
-
 use std::path::PathBuf;
-
 mod multicast;
 pub mod protocol;
 mod unicast;
@@ -33,7 +30,7 @@ async fn main() {
         .to_string_lossy()
         .into_owned();
 
-    let config = ini!(&config_path);
+    let config = ini::load_from_file(&config_path).expect("Failed to load config file");
 
     //let config = ini!("C:\\bloc2\\UE21_Reseau\\projet\\container\\dispatch-container\\src\\config.ini");
 

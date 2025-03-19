@@ -1,9 +1,8 @@
-use ini::ini;
 use tokio::time::{sleep, Duration};
 use tokio::net::UdpSocket;
 
 /// Fonction pour envoyer les annonces ALIVE en multicast
-pub async fn send_alive(domain_name: String, multicast_address: String, multicast_port: String, multicast_delay: String) {
+pub async fn send_alive(domain_name: String, multicast_address: String, multicast_port: String, multicast_delay: String, unicast_port: String) {
     // Crée un socket UDP qui peut envoyer des messages Multicast
     let socket = UdpSocket::bind("0.0.0.0:0")
         .await
@@ -16,7 +15,7 @@ pub async fn send_alive(domain_name: String, multicast_address: String, multicas
     let target = format!("{}:{}", multicast_address, multicast_port);
 
     loop {
-        let message = format!("ALIVE {}. {}\r\n", domain_name, multicast_port);
+        let message = format!("ALIVE {}. {}\r\n", domain_name, unicast_port);
         println!("Envoi du message ALIVE : {}", message);
 
         socket
