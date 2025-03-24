@@ -24,35 +24,46 @@ pub async fn send_alive(
         })
         .expect("Interface réseau introuvable ou sans IP v4");
 
-    println!("Utilisation de l'interface {} ({}) pour le multicast", network_interface, local_ip);
+    println!(
+        "📡 Utilisation de l'interface {} ({}) pour le multicast",
+        network_interface, local_ip
+    );
 
-    // 2. Créer un socket UDP avec socket2
+    // 2. Créer un socket UDP bas niveau
     let socket = Socket::new(Domain::IPV4, Type::DGRAM, Some(Protocol::UDP))
         .expect("Impossible de créer le socket bas niveau");
 
-    // 3. Lier à une IP locale quelconque (port dynamique)
-    socket.bind(&SocketAddr::from(([0, 0, 0, 0], 0)).into())
+    // 3. Lier à l'IP locale (optionnel : 0.0.0.0 ou local_ip)
+    socket
+        .bind(&SocketAddr::from((local_ip, 0)).into())
         .expect("Impossible de binder le socket");
 
     // 4. Définir l'interface de sortie pour le multicast
-    socket.set_multicast_if_v4(&local_ip)
+    socket
+        .set_multicast_if_v4(&local_ip)
         .expect("Impossible de définir l'interface multicast");
 
-    // 5. Convertir en socket Tokio
+    // 5. Convertir en socket tokio
     let std_socket: std::net::UdpSocket = socket.into();
     let udp_socket = UdpSocket::from_std(std_socket)
         .expect("Impossible de convertir en UdpSocket tokio");
 
-    let target = format!("{}:{}", multicast_ip, port_multicast);
+    // 6. Adresse de destination en SocketAddr
+    let target: SocketAddr = format!("{}:{}", multicast_ip, port_multicast)
+        .parse()
+        .expect("Adresse multicast invalide");
 
+    // 7. Boucle d'envoi
     loop {
         let message = format!("ALIVE {}. {}\r\n", domain_name, unicast_port);
         println!("📤 Envoi du message ALIVE : {}", message);
 
-        udp_socket
-            .send_to(message.as_bytes(), &target)
+        let sent = udp_socket
+            .send_to(message.as_bytes(), target)
             .await
             .expect("Impossible d'envoyer le message");
+
+        println!("✅ {} octets envoyés à {}", sent, target);
 
         sleep(Duration::from_secs(delay)).await;
     }
