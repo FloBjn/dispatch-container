@@ -13,7 +13,7 @@ pub async fn start_container_server(tcp_port: u16, directory: String) -> tokio::
     loop {
         match listener.accept().await {
             Ok((stream, addr)) => {
-                println!("✅ Connexion acceptée depuis {}", addr);
+                println!("Connexion acceptée depuis {}", addr);
                 let directory = Arc::clone(&directory);
                 tokio::spawn(async move {
                     if let Err(e) = handle_client(stream, &directory).await {
@@ -47,7 +47,7 @@ async fn handle_client(mut stream: TcpStream, directory: &str) -> tokio::io::Res
                 line.clear();
             }
             Err(e) => {
-                eprintln!("⚠️ Erreur de lecture du client : {}", e);
+                eprintln!("Erreur de lecture du client : {}", e);
                 break;
             }
         }
