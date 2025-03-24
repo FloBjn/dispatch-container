@@ -6,6 +6,7 @@ use std::net::{SocketAddr, Ipv4Addr, IpAddr};
 
 /// Fonction pour envoyer les annonces ALIVE en multicast
 pub async fn send_alive(
+
     domain_name: &str,
     multicast_ip: &str,
     port_multicast: u16,
