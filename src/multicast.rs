@@ -6,7 +6,6 @@ use std::net::{SocketAddr, Ipv4Addr, IpAddr};
 
 /// Fonction pour envoyer les annonces ALIVE en multicast
 pub async fn send_alive(
-
     domain_name: &str,
     multicast_ip: &str,
     port_multicast: u16,
@@ -14,6 +13,7 @@ pub async fn send_alive(
     unicast_port: u16,
     network_interface: &str,
 ) {
+    let any_ip = Ipv4Addr::UNSPECIFIED;
     // 1. Trouver l'IP de l'interface demandée
     let local_ip = get_if_addrs()
         .expect("Impossible d'obtenir les interfaces réseau")
@@ -36,8 +36,8 @@ pub async fn send_alive(
 
     // 3. Lier à l'IP locale (optionnel : 0.0.0.0 ou local_ip)
     socket
-        .bind(&SocketAddr::from((local_ip, 0)).into())
-        .expect("Impossible de binder le socket");
+        .bind(&SocketAddr::from((any_ip, 0)).into())
+        .expect("Impossible de binder le socket sur 0.0.0.0");
 
     // 4. Définir l'interface de sortie pour le multicast
     socket
