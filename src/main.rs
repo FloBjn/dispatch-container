@@ -1,8 +1,6 @@
 use std::path::PathBuf;
 use ini::configparser::ini::Ini;
 
-use get_if_addrs::get_if_addrs;
-
 mod multicast;
 pub mod protocol;
 mod unicast;
@@ -27,7 +25,6 @@ const UNICAST_PORT: u16 = 1234;
 #[tokio::main]
 async fn main() {
     println!("🚀 Container Rust démarré...");
-    debug_interfaces();
 
     // Construction dynamique du chemin
     let config_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
@@ -35,7 +32,7 @@ async fn main() {
         .to_string_lossy()
         .into_owned();
 
-    let config = Ini::lo(&config_path).expect("Failed to load config file");
+    let config = Ini::load(&mut Ini::new(), &config_path).expect("Failed to load config file");
 
     //let config = ini!("C:\\bloc2\\UE21_Reseau\\projet\\container\\dispatch-container\\src\\config.ini");
 
@@ -53,12 +50,4 @@ async fn main() {
 
     // Attendre que les deux tâches tournent en parallèle
     let _ = tokio::join!(multicast_task, unicast_task);
-}
-
-}
-fn debug_interfaces() {
-    println!("Interfaces disponibles :");
-    for iface in get_if_addrs().unwrap() {
-        println!("📡 {} - {:?}", iface.name, iface.ip());
-    }
 }
