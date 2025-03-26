@@ -4,7 +4,7 @@ use lazy_static::lazy_static;
 /// Définition statique des regex (doit être en dehors d'un `impl`)
 lazy_static! {
     pub static ref POST_REGEX: Regex = Regex::new(r"^POST\s+(?P<filename>[A-Fa-f0-9]+)\s+(?P<size>\d+)\s+(?P<hash>[A-Za-z0-9]+)\n(?P<octets>.*)$").unwrap();
-    pub static ref GET_REGEX: Regex = Regex::new(r"^GET\s+(?P<filename>[A-Za-z0-9._-]+)\n$").unwrap();
+    pub static ref GET_REGEX: Regex = Regex::new(r"^GET\s+(?P<filename>[A-Fa-f0-9]+)(\r\n)?$").unwrap();
     pub static ref DELETE_REGEX: Regex = Regex::new(r"^DELETE\s+(?P<filename>[A-Za-z0-9._-]+)\n$").unwrap();
 }
 
@@ -47,9 +47,9 @@ impl Protocol {
     }
 
     /// Génère un message `GET_OK` ou `GET_ERROR`
-    pub fn get_result(success: bool, filename: &str, size: usize, hash: &str) -> String {
+    pub fn get_result(success: bool, filename: &str, size: usize, crypted_content: &str) -> String {
         if success {
-            format!("GET_OK {} {} {}{}", filename, size, hash, Self::EOL)
+            format!("GET_OK {} {} {}{}", filename, size, crypted_content, Self::EOL)
         } else {
             format!("GET_ERROR{}", Self::EOL)
         }
