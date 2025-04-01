@@ -15,10 +15,10 @@ mod request_manager {
 
 const DOMAIN_NAME: &str = "container01";
 const MULTICAST_IP: &str = "224.123.123.123";
-const MULTICAST_PORT: u16 = 50204; // Port multicast de notre groupe
+const MULTICAST_PORT: u16 = 50204;
 const NETWORK_INTERFACE: &str = "{7330745A-3C9C-4FFF-A444-5C9091BA89A2}";
 const MULTICAST_DELAY: u64 = 60;
-static DIRECTORY: &str = "C:\\TEMP\\CONTAINER1";
+static DIRECTORY: &str = "C:\\TEMP\\CONTAINER";
 const UNICAST_PORT: u16 = 1234;
 
 

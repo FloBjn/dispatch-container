@@ -1,27 +1,18 @@
-use crate::{protocol, request_manager::{get_manager, post_manager, delete_manager}};
+use crate::{protocol::Protocol, request_manager::{get_manager, delete_manager}};
 
-/// Analyse un message reçu et effectue l'action correspondante.
+/// Analyse un message (hors POST binaire) et effectue l'action correspondante.
 pub(crate) fn analyse_message(directory: &str, line: &str) -> String {
     match (
-        protocol::Protocol::parse_post(line),
-        protocol::Protocol::parse_get(line),
-        protocol::Protocol::parse_delete(line),
+        Protocol::parse_get(line),
+        Protocol::parse_delete(line),
     ) {
-        // Si le message correspond à un POST
-        (Some((filename, size, hash, octets)), _, _) => {
-            // Sauvegarde le fichier et renvoie la réponse
-            let response = post_manager::save_file(directory, filename, size, hash, octets);
-            response.to_string()
-        }
         // Si le message correspond à un GET
-        (_, Some(filename), _) => {
-            // Récupère le fichier et renvoie la réponse
+        (Some(filename), _) => {
             let response = get_manager::get_file(directory, filename);
             response.to_string()
         }
         // Si le message correspond à un DELETE
-        (_, _, Some(filename)) => {
-            // Supprime le fichier et renvoie la réponse
+        (_, Some(filename)) => {
             let response = delete_manager::delete_file(directory, filename);
             response.to_string()
         }

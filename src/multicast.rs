@@ -57,14 +57,14 @@ pub async fn send_alive(
     // 7. Boucle d'envoi
     loop {
         let message = format!("ALIVE {}. {}\r\n", domain_name, unicast_port);
-        println!("📤 Envoi du message ALIVE : {}", message);
+        println!("Envoi du message ALIVE : {}", message);
 
         let sent = udp_socket
             .send_to(message.as_bytes(), target)
             .await
             .expect("Impossible d'envoyer le message");
 
-        println!("✅ {} octets envoyés à {}", sent, target);
+        println!("{} octets envoyés à {}", sent, target);
 
         sleep(Duration::from_secs(delay)).await;
     }
