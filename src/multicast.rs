@@ -26,7 +26,7 @@ pub async fn send_alive(
         .expect("Interface réseau introuvable ou sans IP v4");
 
     println!(
-        "📡 Utilisation de l'interface {} ({}) pour le multicast",
+        "Utilisation de l'interface {} ({}) pour le multicast",
         network_interface, local_ip
     );
 
