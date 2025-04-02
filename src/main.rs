@@ -1,4 +1,5 @@
 use std::path::PathBuf;
+use get_if_addrs::get_if_addrs;
 use ini::configparser::ini::Ini;
 
 mod multicast;
@@ -16,7 +17,7 @@ mod request_manager {
 const DOMAIN_NAME: &str = "container01";
 const MULTICAST_IP: &str = "224.123.123.123";
 const MULTICAST_PORT: u16 = 50204;
-const NETWORK_INTERFACE: &str = "{7330745A-3C9C-4FFF-A444-5C9091BA89A2}";
+const NETWORK_INTERFACE: &str = "{455A6884-B3BC-4390-9DD0-AA60D7B50BFE}";
 const MULTICAST_DELAY: u64 = 60;
 static DIRECTORY: &str = "C:\\TEMP\\CONTAINER";
 const UNICAST_PORT: u16 = 1234;
@@ -25,6 +26,7 @@ const UNICAST_PORT: u16 = 1234;
 #[tokio::main]
 async fn main() {
     println!("🚀 Container Rust démarré...");
+    debug_interfaces();
 
     // Construction dynamique du chemin
     let config_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
@@ -50,4 +52,11 @@ async fn main() {
 
     // Attendre que les deux tâches tournent en parallèle
     let _ = tokio::join!(multicast_task, unicast_task);
+}
+
+fn debug_interfaces() {
+    println!("Interfaces disponibles :");
+    for iface in get_if_addrs().unwrap() {
+        println!("📡 {} - {:?}", iface.name, iface.ip());
+    }
 }
