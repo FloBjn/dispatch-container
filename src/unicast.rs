@@ -37,7 +37,7 @@ async fn handle_client(mut stream: TcpStream, directory: &str) -> tokio::io::Res
 
     // Lecture de l'en-tête POST
     reader.read_line(&mut header).await?;
-
+    println!("{:#?}", header);
     if let Some((filename, size, expected_hash)) = Protocol::parse_post_header(&header) {
 
         // Lecture binaire du fichier
