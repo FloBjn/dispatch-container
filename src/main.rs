@@ -46,7 +46,7 @@ async fn main() {
     let working_folder_path = config["container_config"]["working_folder_path"].clone().unwrap();
 
     // Exécuter Multicast et Unicast en parallèle
-    let multicast_task = tokio::spawn(multicast::send_alive(DOMAIN_NAME, MULTICAST_IP, MULTICAST_PORT, MULTICAST_DELAY, UNICAST_PORT, NETWORK_INTERFACE));
+    let multicast_task = tokio::spawn(multicast::send_alive(DOMAIN_NAME, MULTICAST_IP, MULTICAST_PORT, MULTICAST_DELAY, UNICAST_PORT));
     let unicast_task = tokio::spawn(unicast::start_container_server(UNICAST_PORT, DIRECTORY.to_string()));
 
     // Attendre que les deux tâches tournent en parallèle
