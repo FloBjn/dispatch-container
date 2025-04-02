@@ -5,6 +5,7 @@ use crate::protocol::Protocol;
 use crate::request_manager::post_manager;
 use sha2::{Digest, Sha384}; // ← ici on utilise sha2 à la place de sha3
 use hex;
+use crate::message_analyser::analyse_message;
 
 /// Lance un serveur TCP pour écouter les connexions du Dispatcher.
 pub async fn start_container_server(tcp_port: u16, directory: String) -> tokio::io::Result<()> {
@@ -38,6 +39,7 @@ async fn handle_client(mut stream: TcpStream, directory: &str) -> tokio::io::Res
     // Lecture de l'en-tête POST
     reader.read_line(&mut header).await?;
     println!("{:#?}", header);
+
     if let Some((filename, size, expected_hash)) = Protocol::parse_post_header(&header) {
 
         // Lecture binaire du fichier
@@ -61,6 +63,10 @@ async fn handle_client(mut stream: TcpStream, directory: &str) -> tokio::io::Res
     } else {
         stream.write_all(b"POST_ERROR\n").await?;
     }
+
+    //Appele d'analyse_message pour gérer le get et le delete
+    let response = analyse_message(directory, &header);
+    stream.write_all(response.as_bytes()).await?;
 
     Ok(())
 }
