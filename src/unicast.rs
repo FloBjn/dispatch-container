@@ -66,6 +66,8 @@ async fn handle_client(mut stream: TcpStream, directory: &str) -> tokio::io::Res
 
     //Appele d'analyse_message pour gérer le get et le delete
     let response = analyse_message(directory, &header);
+    println!("{:#?}", response);
+
     stream.write_all(response.as_bytes()).await?;
 
     Ok(())

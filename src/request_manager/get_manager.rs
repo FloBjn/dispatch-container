@@ -1,10 +1,13 @@
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
+use hex::encode;
 use crate::protocol::Protocol;
 
 pub(crate) fn get_file(directory: &str, file_name: &str) -> String {
     let file_path = Path::new(directory).join(file_name);
+
+    println!("{:?}", file_path);
 
     if file_path.exists() {
         // Ouvre le fichier et gère les erreurs correctement
@@ -13,22 +16,28 @@ pub(crate) fn get_file(directory: &str, file_name: &str) -> String {
             Err(_) => return Protocol::get_result(false, file_name, 0, ""),
         };
 
+        println!("openfile ok");
+
         //Lis le contenu et le stock dans un Vec, tout en gérant les erreurs
         let mut content = Vec::new();
         if file.read_to_end(&mut content).is_err() {
             return Protocol::get_result(false, file_name, 0, "");
         }
 
-        let content = match String::from_utf8(content) {
-            Ok(s) => s,
-            Err(_) => return Protocol::get_result(false, file_name, 0, ""),
-        };
+        println!("lecture ok");
+
+        // Encodage en base64 pour éviter les problèmes d'affichage
+        let content = encode(&content);
+
+        println!("conversion ok");
 
         //Va chercher la taille dans les metadata du fichier trouvé
         let size = match file_path.metadata() {
             Ok(meta) => meta.len() as usize,
             Err(_) => return Protocol::get_result(false, file_name, 0, ""),
         };
+
+        println!("size ok");
 
         return Protocol::get_result(true, file_name, size, &content);
     }

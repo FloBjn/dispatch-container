@@ -40,9 +40,9 @@ impl Protocol {
         }
     }
 
-    pub fn get_result(success: bool, filename: &str, size: usize, crypted_content: &str) -> String {
+    pub fn get_result(success: bool, filename: &str, size: usize, encrypted_content: &str) -> String {
         if success {
-            format!("GET_OK {} {} {}{}", filename, size, crypted_content, Self::EOL)
+            format!("GET_OK {} {} {} {}", filename, size, encrypted_content, Self::EOL)
         } else {
             format!("GET_ERROR{}", Self::EOL)
         }
