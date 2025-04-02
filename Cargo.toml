@@ -1,7 +1,15 @@
 [package]
-name = "dispatch-container"
+name = "dispatch_container"
 version = "0.1.0"
 edition = "2021"
+
+[lib]
+name = "mon_projet"
+path = "src/lib.rs"
+
+[[bin]]
+name = "dispatch_container"
+path = "src/main.rs"
 
 [dependencies]
 tokio = { version = "1", features = ["full"] }

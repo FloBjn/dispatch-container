@@ -1,4 +1,4 @@
-use super::protocol::Protocol;
+use dispatch_container::protocol::Protocol;
 #[cfg(test)]
 mod tests {
     #[test]
