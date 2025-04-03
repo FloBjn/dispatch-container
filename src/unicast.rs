@@ -60,15 +60,14 @@ async fn handle_client(mut stream: TcpStream, directory: &str) -> tokio::io::Res
             let response = Protocol::post_result(false);
             stream.write_all(response.as_bytes()).await?;
         }
-    } else {
-        stream.write_all(b"POST_ERROR\n").await?;
+    } else if Protocol::parse_get(&header).is_some() || Protocol::parse_delete(&header).is_some() {
+        //Appel d'analyse_message pour gérer le GET et le DELETE
+        let response = analyse_message(directory, &header);
+        stream.write_all(response.as_bytes()).await?;
     }
-
-    //Appel d'analyse_message pour gérer le GET et le DELETE
-    let response = analyse_message(directory, &header);
-    println!("{:#?}", response);
-
-    stream.write_all(response.as_bytes()).await?;
-
+    else {
+        // → Aucun format reconnu
+        stream.write_all(b"UNKNOWN_COMMAND\n").await?;
+    }
     Ok(())
 }
