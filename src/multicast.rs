@@ -1,6 +1,7 @@
 use tokio::time::{sleep, Duration};
 use tokio::net::UdpSocket;
 use std::net::SocketAddr;
+use crate::protocol::Protocol;
 
 /// Fonction pour envoyer les annonces ALIVE en multicast
 pub async fn send_alive(
@@ -20,12 +21,12 @@ pub async fn send_alive(
         .parse()
         .expect("Adresse multicast invalide");
 
-    println!("📡 Envoi de multicast vers {} toutes les {} secondes...", target, delay);
+    println!("Envoi de multicast vers {} toutes les {} secondes...", target, delay);
 
     // 3. Boucle d'envoi
     loop {
-        let message = format!("ALIVE {}. {}\r\n", domain_name, unicast_port);
-        println!("📤 Envoi du message ALIVE : {}", message.trim());
+        let message = Protocol::alive_message(domain_name, unicast_port);
+        println!("Envoi du message ALIVE : {}", message.trim());
 
         let sent = udp_socket
             .send_to(message.as_bytes(), target)

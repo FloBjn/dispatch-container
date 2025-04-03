@@ -36,39 +36,35 @@ async fn handle_client(mut stream: TcpStream, directory: &str) -> tokio::io::Res
     let mut reader = BufReader::new(&mut stream);
     let mut header = String::new();
 
-    // Lecture de l'en-tête POST
+    // Lecture de la ligne de commande
     reader.read_line(&mut header).await?;
-    println!("{:#?}", header);
+    println!("Requête reçue : {:?}", header);
 
     if let Some((filename, size, expected_hash)) = Protocol::parse_post_header(&header) {
-
-        // Lecture binaire du fichier
+        // → C'est une commande POST, on lit les octets suivants
         let mut buffer = vec![0u8; size];
         reader.read_exact(&mut buffer).await?;
 
-        // Vérification du hash (SHA-384 - SHA-2)
         let mut hasher = Sha384::new();
         hasher.update(&buffer);
         let computed_hash = hex::encode(hasher.finalize());
 
-        if computed_hash == expected_hash {
+        let success = computed_hash == expected_hash
+            && post_manager::save_file(directory, &filename, &buffer);
 
-            let saved = post_manager::save_file(directory, &filename, &buffer);
-            let response = Protocol::post_result(saved);
-            stream.write_all(response.as_bytes()).await?;
-        } else {
-            let response = Protocol::post_result(false);
-            stream.write_all(response.as_bytes()).await?;
-        }
-    } else {
-        stream.write_all(b"POST_ERROR\n").await?;
+        let response = Protocol::post_result(success);
+        stream.write_all(response.as_bytes()).await?;
     }
-
-    //Appele d'analyse_message pour gérer le get et le delete
-    let response = analyse_message(directory, &header);
-    println!("{:#?}", response);
-
-    stream.write_all(response.as_bytes()).await?;
+    else if Protocol::parse_get(&header).is_some() || Protocol::parse_delete(&header).is_some() {
+        // → C'est une commande GET ou DELETE, on appelle analyse_message
+        let response = analyse_message(directory, &header);
+        stream.write_all(response.as_bytes()).await?;
+    }
+    else {
+        // → Aucun format reconnu
+        stream.write_all(b"UNKNOWN_COMMAND\n").await?;
+    }
 
     Ok(())
 }
+
