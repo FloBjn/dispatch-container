@@ -1,16 +1,21 @@
-use regex::Regex;
 use lazy_static::lazy_static;
+use regex::Regex;
 
 lazy_static! {
-    pub static ref POST_HEADER_REGEX: Regex = Regex::new(r"^POST\s+(?P<filename>[A-Fa-f0-9]+)\s+(?P<size>\d+)\s+(?P<hash>[A-Za-z0-9]+)\r?\n$").unwrap();
-    pub static ref GET_REGEX: Regex = Regex::new(r"^GET\s+(?P<filename>[A-Fa-f0-9]+)(\r\n)?$").unwrap();
-    pub static ref DELETE_REGEX: Regex = Regex::new(r"^DELETE\s+(?P<filename>[A-Za-z0-9._-]+)\n$").unwrap();
+    pub static ref POST_HEADER_REGEX: Regex = Regex::new(
+        r"^POST\s+(?P<filename>[A-Fa-f0-9]+)\s+(?P<size>\d+)\s+(?P<hash>[A-Za-z0-9]+)\r?\n$"
+    )
+    .unwrap();
+    pub static ref GET_REGEX: Regex =
+        Regex::new(r"^GET\s+(?P<filename>[A-Fa-f0-9]+)(\r\n)?$").unwrap();
+    pub static ref DELETE_REGEX: Regex =
+        Regex::new(r"^DELETE\s+(?P<filename>[A-Za-z0-9._-]+)\r?\n$").unwrap();
 }
 
 pub struct Protocol;
 
 impl Protocol {
-    pub const EOL: &'static str = "\n";
+    pub const EOL: &'static str = "\r\n";
 
     /// Parse uniquement l'en-tête POST (sans les octets)
     pub fn parse_post_header(header: &str) -> Option<(String, usize, String)> {
@@ -25,11 +30,15 @@ impl Protocol {
     }
 
     pub fn parse_get(message: &str) -> Option<String> {
-        GET_REGEX.captures(message).map(|cap| cap["filename"].to_string())
+        GET_REGEX
+            .captures(message)
+            .map(|cap| cap["filename"].to_string())
     }
 
     pub fn parse_delete(message: &str) -> Option<String> {
-        DELETE_REGEX.captures(message).map(|cap| cap["filename"].to_string())
+        DELETE_REGEX
+            .captures(message)
+            .map(|cap| cap["filename"].to_string())
     }
 
     pub fn post_result(success: bool) -> String {
@@ -39,12 +48,27 @@ impl Protocol {
             format!("POST_ERROR{}", Self::EOL)
         }
     }
-
-    pub fn get_result(success: bool, filename: &str, size: usize, hashed_content: &str, encrypted_content: &str) -> String {
+    pub fn alive_message(domain_name: &str, unicast_port: u16) -> String {
+        format!("ALIVE {} {}{}", domain_name, unicast_port, Self::EOL)
+    }
+    pub fn get_result(
+        success: bool,
+        filename: &str,
+        size: usize,
+        hashed_content: &str,
+        content: &str
+    ) -> String {
         if success {
-            format!("GET_OK {} {} {} {} {}", filename, size, hashed_content, Self::EOL, encrypted_content)
-        } else {
+            format!(
 
+                "GET_OK {} {} {} {} {}",
+                filename,
+                size,
+                hashed_content,
+                Self::EOL,
+                content
+            )
+        } else {
             format!("GET_ERROR{}", Self::EOL)
         }
     }
