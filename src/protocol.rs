@@ -55,15 +55,18 @@ impl Protocol {
         success: bool,
         filename: &str,
         size: usize,
-        encrypted_content: &str,
+        hashed_content: &str,
+        content: &str
     ) -> String {
         if success {
             format!(
-                "GET_OK {} {} {} {}",
+
+                "GET_OK {} {} {} {} {}",
                 filename,
                 size,
-                encrypted_content,
-                Self::EOL
+                hashed_content,
+                Self::EOL,
+                content
             )
         } else {
             format!("GET_ERROR{}", Self::EOL)

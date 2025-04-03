@@ -36,15 +36,16 @@ async fn handle_client(mut stream: TcpStream, directory: &str) -> tokio::io::Res
     let mut reader = BufReader::new(&mut stream);
     let mut header = String::new();
 
-    // Lecture de la ligne de commande
     reader.read_line(&mut header).await?;
-    println!("Requête reçue : {:?}", header);
+    println!("{:#?}", header);
 
     if let Some((filename, size, expected_hash)) = Protocol::parse_post_header(&header) {
-        // → C'est une commande POST, on lit les octets suivants
+
+        // Lecture binaire du fichier
         let mut buffer = vec![0u8; size];
         reader.read_exact(&mut buffer).await?;
 
+        // Vérification du hash (SHA-384 - SHA-2)
         let mut hasher = Sha384::new();
         hasher.update(&buffer);
         let computed_hash = hex::encode(hasher.finalize());
@@ -67,4 +68,3 @@ async fn handle_client(mut stream: TcpStream, directory: &str) -> tokio::io::Res
 
     Ok(())
 }
-
