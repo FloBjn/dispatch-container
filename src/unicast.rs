@@ -36,10 +36,10 @@ async fn handle_client(mut stream: TcpStream, directory: &str) -> tokio::io::Res
     let mut reader = BufReader::new(&mut stream);
     let mut header = String::new();
 
-    // Lecture de l'en-tête POST
     reader.read_line(&mut header).await?;
     println!("{:#?}", header);
 
+    // Lecture de l'en-tête POST
     if let Some((filename, size, expected_hash)) = Protocol::parse_post_header(&header) {
 
         // Lecture binaire du fichier
@@ -64,7 +64,7 @@ async fn handle_client(mut stream: TcpStream, directory: &str) -> tokio::io::Res
         stream.write_all(b"POST_ERROR\n").await?;
     }
 
-    //Appele d'analyse_message pour gérer le get et le delete
+    //Appel d'analyse_message pour gérer le GET et le DELETE
     let response = analyse_message(directory, &header);
     println!("{:#?}", response);
 

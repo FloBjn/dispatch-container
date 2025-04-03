@@ -26,7 +26,7 @@ pub(crate) fn get_file(directory: &str, file_name: &str) -> String {
 
         println!("lecture ok");
 
-        // Encodage en base64 pour éviter les problèmes d'affichage
+        // Encodage en hexadécimal
         let content = encode(&content);
 
         println!("conversion ok");
