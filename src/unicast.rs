@@ -8,7 +8,7 @@ use hex;
 use crate::message_analyser::analyse_message;
 
 /// Lance un serveur TCP pour écouter les connexions du Dispatcher.
-pub async fn start_container_server(tcp_port: u16, directory: String) -> tokio::io::Result<()> {
+pub async fn start_container_server(tcp_port: String, directory: String) -> tokio::io::Result<()> {
     let listener = TcpListener::bind(("0.0.0.0", tcp_port)).await?;
     let directory = Arc::new(directory);
 

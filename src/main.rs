@@ -1,6 +1,6 @@
 use std::path::PathBuf;
-use get_if_addrs::get_if_addrs;
 use ini::configparser::ini::Ini;
+use ini::ini;
 
 mod multicast;
 pub mod protocol;
@@ -25,17 +25,13 @@ const UNICAST_PORT: u16 = 1234;
 
 #[tokio::main]
 async fn main() {
-    println!("🚀 Container Rust démarré...");
-    debug_interfaces();
+    println!("Container Rust démarré...");
     // Construction dynamique du chemin
     let config_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("src/config.ini")
         .to_string_lossy()
         .into_owned();
-
-    let config = Ini::load(&mut Ini::new(), &config_path).expect("Failed to load config file");
-
-    //let config = ini!("C:\\bloc2\\UE21_Reseau\\projet\\container\\dispatch-container\\src\\config.ini");
+    let config = ini!("C:\\temp\\config.ini");
 
     let domain_name = config["container_config"]["container_id"].clone().unwrap();
     let multicast_address = config["container_config"]["multicast_address"].clone().unwrap();
@@ -45,16 +41,10 @@ async fn main() {
     let unicast_port = config["container_config"]["unicast_port"].clone().unwrap();
     let working_folder_path = config["container_config"]["working_folder_path"].clone().unwrap();
 
-    // Exécuter Multicast et Unicast en parallèle
-    let multicast_task = tokio::spawn(multicast::send_alive(DOMAIN_NAME, MULTICAST_IP, MULTICAST_PORT, MULTICAST_DELAY, UNICAST_PORT));
-    let unicast_task = tokio::spawn(unicast::start_container_server(UNICAST_PORT, DIRECTORY.to_string()));
+      // Exécuter Multicast et Unicast en parallèle
+    let multicast_task = tokio::spawn(multicast::send_alive(domain_name, multicast_address, multicast_port, multicast_delay, dispatcher_ip));
+    let unicast_task = tokio::spawn(unicast::start_container_server(unicast_port, working_folder_path));
 
     // Attendre que les deux tâches tournent en parallèle
     let _ = tokio::join!(multicast_task, unicast_task);
-}
-fn debug_interfaces() {
-    println!("Interfaces disponibles :");
-    for iface in get_if_addrs().unwrap() {
-        println!("📡 {} - {:?}", iface.name, iface.ip());
-    }
 }

@@ -5,11 +5,11 @@ use crate::protocol::Protocol;
 
 /// Fonction pour envoyer les annonces ALIVE en multicast
 pub async fn send_alive(
-    domain_name: &str,
-    multicast_ip: &str,
-    port_multicast: u16,
-    delay: u64,
-    unicast_port: u16,
+    domain_name: String,
+    multicast_ip: String,
+    port_multicast: String,
+    delay: String,
+    unicast_port: String,
 ) {
     // 1. Créer un socket UDP simple (lié à 0.0.0.0 pour laisser le système choisir l'interface)
     let udp_socket = UdpSocket::bind("0.0.0.0:0")
@@ -25,7 +25,7 @@ pub async fn send_alive(
 
     // 3. Boucle d'envoi
     loop {
-        let message = Protocol::alive_message(domain_name, unicast_port);
+        let message = Protocol::alive_message(&*domain_name, unicast_port.parse().unwrap());
         println!("Envoi du message ALIVE : {}", message.trim());
 
         let sent = udp_socket
@@ -35,6 +35,6 @@ pub async fn send_alive(
 
         println!("✅ {} octets envoyés à {}", sent, target);
 
-        sleep(Duration::from_secs(delay)).await;
+        sleep(Duration::from_secs(delay.parse().unwrap())).await;
     }
 }
