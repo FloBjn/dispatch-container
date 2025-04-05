@@ -8,13 +8,11 @@ pub(crate) fn analyse_message(directory: &str, line: &str) -> String {
     ) {
         // Si le message correspond à un GET
         (Some(filename), _) => {
-            println!("GET : {}", filename);
             let response = get_manager::get_file(directory, &filename);
             response.to_string()
         }
         // Si le message correspond à un DELETE
         (_, Some(filename)) => {
-            println!("DELETE : {}", filename);
             let response = delete_manager::delete_file(directory, &filename);
             response.to_string()
         }

@@ -3,7 +3,7 @@ use std::io::Read;
 use std::path::Path;
 use hex::encode;
 use sha2::Sha384;
-use sha3::Digest;
+use sha3::{Digest, Sha3_384};
 use crate::protocol::Protocol;
 
 pub(crate) fn get_file(directory: &str, file_name: &str) -> String {
@@ -26,7 +26,7 @@ pub(crate) fn get_file(directory: &str, file_name: &str) -> String {
         let content = encode(&content);
 
         //hachage du contenu
-        let mut hasher = Sha384::new();
+        let mut hasher = Sha3_384::new();
         hasher.update(&content);
         let computed_hash = hex::encode(hasher.finalize());
 
