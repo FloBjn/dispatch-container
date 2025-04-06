@@ -3,9 +3,8 @@ use tokio::net::{TcpListener, TcpStream};
 use std::sync::Arc;
 use crate::protocol::Protocol;
 use crate::request_manager::post_manager;
-use sha2::{Digest, Sha384};
 use hex;
-use sha3::Sha3_384;
+use sha3::{Digest, Sha3_384};
 use crate::message_analyser::analyse_message;
 
 pub async fn start_container_server(tcp_port: u16, directory: String) -> tokio::io::Result<()> {
@@ -30,24 +29,18 @@ pub async fn start_container_server(tcp_port: u16, directory: String) -> tokio::
 }
 
 async fn handle_client(mut stream: TcpStream, directory: &str) -> tokio::io::Result<()> {
-    // Étape 1 : Lire la ligne de commande
+    let mut reader = BufReader::new(&mut stream);
     let mut header = String::new();
-    {
-        let mut reader = BufReader::new(&mut stream);
-        reader.read_line(&mut header).await?;
-    }
+
+    reader.read_line(&mut header).await?;
 
     if let Some((filename, size, expected_hash)) = Protocol::parse_post_header(&header) {
-        // Étape 2 : signaler qu’on est prêt à recevoir les octets
-        stream.write_all(b"READY\r\n").await?;
 
-        // Étape 3 : lire les données binaires
+        // Lecture binaire du fichier
         let mut buffer = vec![0u8; size];
-        let mut reader = BufReader::new(&mut stream); // ✅ re-emprunt possible
         reader.read_exact(&mut buffer).await?;
 
-        // Étape 4 : vérification et sauvegarde
-        let mut hasher = Sha384::new();
+        let mut hasher = Sha3_384::new();
         hasher.update(&buffer);
         let computed_hash = hex::encode(hasher.finalize());
 
@@ -62,9 +55,9 @@ async fn handle_client(mut stream: TcpStream, directory: &str) -> tokio::io::Res
         stream.write_all(response.as_bytes()).await?;
     }
     else {
-        stream.write_all(b"UNKNOWN_COMMAND\r\n").await?;
+        // → Aucun format reconnu
+        stream.write_all(b"UNKNOWN_COMMAND\n").await?;
     }
 
     Ok(())
 }
-
