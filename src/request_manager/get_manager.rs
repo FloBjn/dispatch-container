@@ -2,7 +2,6 @@ use std::fs::File;
 use std::io::Read;
 use std::path::Path;
 use hex::encode;
-use sha2::Sha384;
 use sha3::{Digest, Sha3_384};
 use crate::protocol::Protocol;
 

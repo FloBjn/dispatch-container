@@ -3,9 +3,8 @@ use tokio::net::{TcpListener, TcpStream};
 use std::sync::Arc;
 use crate::protocol::Protocol;
 use crate::request_manager::post_manager;
-use sha2::{Digest};
 use hex;
-use sha3::Sha3_384;
+use sha3::{Digest, Sha3_384};
 use crate::message_analyser::analyse_message;
 
 pub async fn start_container_server(tcp_port: u16, directory: String) -> tokio::io::Result<()> {
@@ -49,6 +48,7 @@ async fn handle_client(mut stream: TcpStream, directory: &str) -> tokio::io::Res
             && post_manager::save_file(directory, &filename, &buffer);
 
         let response = Protocol::post_result(success);
+        println!("{}", response);
         stream.write_all(response.as_bytes()).await?;
     }
     else if Protocol::parse_get(&header).is_some() || Protocol::parse_delete(&header).is_some() {
