@@ -26,7 +26,7 @@ pub(crate) fn get_file(directory: &str, file_name: &str) -> String {
         let content = encode(&content);
 
         //hachage du contenu
-        let mut hasher = Sha3_384::new();
+        let mut hasher = Sha384::new();
         hasher.update(&content);
         let computed_hash = hex::encode(hasher.finalize());
 
